@@ -1,0 +1,28 @@
+{
+  "name": "termproject",
+  "version": "1.0.0",
+  "description": "\"# Comp4537_Project\"",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie": "^0.6.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "express-session": "^1.18.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.9.3",
+    "node": "^21.7.1",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.0",
+    "parser": "^0.1.4",
+    "url": "^0.11.3"
+  }
+}
