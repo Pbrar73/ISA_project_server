@@ -3,18 +3,18 @@ const express = require('express');
 const path = require('path');
 const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken'); // Added JWT library
 const url = require('url');
 
 const app = express();
-const port = process.env.PORT || 3019;
-
+const port = process.env.PORT || 3019
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://regal-axolotl-938764.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://660e9b7b6b4264051b1ed93c--regal-axolotl-938764.netlify.app');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -24,30 +24,30 @@ app.use((req, res, next) => {
     next();
 });
 
-  const dbUrl = process.env.JAWSDB_URL;
-  let dbOptions = {};
-  
-  if (dbUrl) {
-      const parsedUrl = new url.URL(dbUrl);
-      dbOptions = {
-          host: parsedUrl.hostname,
-          user: parsedUrl.username,
-          password: parsedUrl.password,
-          database: parsedUrl.pathname.substr(1),
-          port: parsedUrl.port,
-          connectionLimit: 10
-      };
-  } else {
-      dbOptions = {
-          host: 'localhost',
-          user: 'root',
-          password: '',
-          database: 'termproject_4537',
-          connectionLimit: 10
-      };
-  }
-  
-  const pool = mysql.createPool(dbOptions);
+const dbUrl = process.env.JAWSDB_URL;
+let dbOptions = {};
+
+if (dbUrl) {
+    const parsedUrl = new url.URL(dbUrl);
+    dbOptions = {
+        host: parsedUrl.hostname,
+        user: parsedUrl.username,
+        password: parsedUrl.password,
+        database: parsedUrl.pathname.substr(1),
+        port: parsedUrl.port,
+        connectionLimit: 10
+    };
+} else {
+    dbOptions = {
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'termproject_4537',
+        connectionLimit: 10
+    };
+}
+
+const pool = mysql.createPool(dbOptions);
 
 const createUsersTable = () => {
     const sql = `
@@ -66,24 +66,21 @@ const createUsersTable = () => {
 
 createUsersTable();
 
+const verifyToken = (req, res, next) => {
+    const token = req.cookies.sessionId;
 
-let fetch;
-import('node-fetch').then(({ default: nodeFetch }) => {
-  fetch = nodeFetch;
-});
-
-const verifySession = (req, res, next) => {
-    const sessionId = req.cookies.sessionId;
-
-    if (!sessionId) {
-        return res.status(401).json({ success: false, message: "Access Denied: Session ID is not provided or is invalid." });
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'Access Denied: No token provided' });
     }
-    next();
-};
 
-app.get('/check-session', verifySession, (req, res) => {
-    res.json({ success: true, message: "Session is valid." });
-});
+    try {
+        const decoded = jwt.verify(token, 'your_secret_key_here');
+        req.userId = decoded.userId;
+        next();
+    } catch (error) {
+        res.status(403).json({ success: false, message: 'Invalid token' });
+    }
+};
 
 app.post('/register', (req, res) => {
     const { email, password } = req.body;
@@ -126,7 +123,11 @@ app.post('/index', (req, res) => {
                     return;
                 }
                 if (isMatch) {
-                    res.cookie('sessionId', user.id, { httpOnly: true });
+                    // Generate JWT token
+                    const token = jwt.sign({ userId: user.id }, 'your_secret_key_here', { expiresIn: '1h' });
+                    
+                    // Set JWT token as HTTP-only cookie
+                    res.cookie('sessionId', token, { httpOnly: true, maxAge: 3600000 });
                     res.status(200).json({ success: true, message: 'Login successful' });
                 } else {
                     res.status(401).json({ success: false, message: 'Incorrect password' });
@@ -136,62 +137,34 @@ app.post('/index', (req, res) => {
     });
 });
 
+app.get('/check-session', verifyToken, (req, res) => {
+    res.json({ success: true, message: 'Session is valid' });
+});
 
 app.post('/generate-quote', async (req, res) => {
-    const userEmail = req.body.userEmail; // Assuming the client sends userEmail
-    const inputs = req.body.inputs;
-
-    if (!userEmail) {
-        return res.status(400).json({ success: false, message: "User email is required." });
-    }
-
     try {
-        // First, find the user by email and increment their api_calls_made
-        pool.query('SELECT * FROM users WHERE email = ?', [userEmail], async (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: false, message: 'Error finding user' });
+        const response = await fetch(
+            'https://api-inference.huggingface.co/models/nandinib1999/quote-generator', {
+                headers: {
+                    'Authorization': 'Bearer ' + process.env.HF_API_TOKEN,
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify({ inputs: req.body.inputs })
             }
+        );
 
-            if (results.length === 0) {
-                return res.status(404).json({ success: false, message: 'User not found' });
-            }
+        if (!response.ok) {
+            throw new Error(`Error from Hugging Face API: ${response.statusText}`);
+        }
 
-            const user = results[0];
-            
-            // Increment api_calls_made
-            pool.query('UPDATE users SET api_calls_made = api_calls_made + 1 WHERE email = ?', [userEmail], async (updateErr) => {
-                if (updateErr) {
-                    // Log error, but don't necessarily fail the whole operation
-                    console.error('Failed to increment API call count for user:', updateErr);
-                }
-
-                // Proceed to fetch the quote as before
-                const response = await fetch(
-                    'https://api-inference.huggingface.co/models/nandinib1999/quote-generator', {
-                        headers: {
-                            'Authorization': 'Bearer ' + process.env.HF_API_TOKEN,
-                            'Content-Type': 'application/json'
-                        },
-                        method: 'POST',
-                        body: JSON.stringify({ inputs })
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(`Error from Hugging Face API: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                res.json(data);
-            });
-        });
+        const data = await response.json();
+        res.json(data);
     } catch (error) {
         console.error('Error:', error);
         res.status(500).send('Error fetching quote.');
     }
 });
-
-
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
