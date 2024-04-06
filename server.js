@@ -138,29 +138,59 @@ app.post('/index', (req, res) => {
 
 
 app.post('/generate-quote', async (req, res) => {
+    const userEmail = req.body.userEmail; // Assuming the client sends userEmail
+    const inputs = req.body.inputs;
+
+    if (!userEmail) {
+        return res.status(400).json({ success: false, message: "User email is required." });
+    }
+
     try {
-        const response = await fetch(
-            'https://api-inference.huggingface.co/models/nandinib1999/quote-generator', {
-                headers: {
-                    'Authorization': 'Bearer ' + process.env.HF_API_TOKEN,
-                    'Content-Type': 'application/json'
-                },
-                method: 'POST',
-                body: JSON.stringify({ inputs: req.body.inputs })
+        // First, find the user by email and increment their api_calls_made
+        pool.query('SELECT * FROM users WHERE email = ?', [userEmail], async (err, results) => {
+            if (err) {
+                return res.status(500).json({ success: false, message: 'Error finding user' });
             }
-        );
 
-        if (!response.ok) {
-            throw new Error(`Error from Hugging Face API: ${response.statusText}`);
-        }
+            if (results.length === 0) {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
 
-        const data = await response.json();
-        res.json(data);
+            const user = results[0];
+            
+            // Increment api_calls_made
+            pool.query('UPDATE users SET api_calls_made = api_calls_made + 1 WHERE email = ?', [userEmail], async (updateErr) => {
+                if (updateErr) {
+                    // Log error, but don't necessarily fail the whole operation
+                    console.error('Failed to increment API call count for user:', updateErr);
+                }
+
+                // Proceed to fetch the quote as before
+                const response = await fetch(
+                    'https://api-inference.huggingface.co/models/nandinib1999/quote-generator', {
+                        headers: {
+                            'Authorization': 'Bearer ' + process.env.HF_API_TOKEN,
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'POST',
+                        body: JSON.stringify({ inputs })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Error from Hugging Face API: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                res.json(data);
+            });
+        });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).send('Error fetching quote.');
     }
 });
+
 
 
 app.listen(port, () => {
