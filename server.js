@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://660e9b7b6b4264051b1ed93c--regal-axolotl-938764.netlify.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://main--regal-axolotl-938764.netlify.app');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
