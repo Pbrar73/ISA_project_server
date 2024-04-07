@@ -106,18 +106,9 @@ app.post('/register', (req, res) => {
     });
 });
 
-app.get('/check-session', (req, res) => {
-    const token = req.cookies.token;
-    if (!token) {
-        return res.status(401).send({ success: false, message: 'No token provided.' });
-    }
-
-    try {
-        jwt.verify(token, jwtSecretKey);
-        res.send({ success: true, message: 'Session is valid.' });
-    } catch (error) {
-        res.status(401).send({ success: false, message: 'Session is invalid.' });
-    }
+app.get('/check-session', verifyToken, (req, res) => {
+    // This will only run if verifyToken calls next(), meaning the token is valid
+    res.json({ success: true, message: "Session is valid." });
 });
 
 
