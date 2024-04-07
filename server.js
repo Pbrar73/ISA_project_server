@@ -137,6 +137,33 @@ app.post('/index', (req, res) => {
 });
 
 
+// Endpoint to get the number of API calls made by a user
+app.get('/api-calls-count', (req, res) => {
+    // Extract the user's email from query parameters
+    const userEmail = req.query.email;
+
+    if (!userEmail) {
+        return res.status(400).json({ success: false, message: "User email is required." });
+    }
+
+    // Query the database for the user's api_calls_made
+    pool.query('SELECT api_calls_made FROM users WHERE email = ?', [userEmail], (err, results) => {
+        if (err) {
+            console.error('Error fetching user API call count:', err);
+            return res.status(500).json({ success: false, message: 'Error fetching API call count' });
+        }
+
+        if (results.length > 0) {
+            // Send back the number of API calls made
+            const apiCallsMade = results[0].api_calls_made;
+            res.json({ success: true, apiCallsMade });
+        } else {
+            res.status(404).json({ success: false, message: 'User not found' });
+        }
+    });
+});
+
+
 app.post('/generate-quote', async (req, res) => {
     const userEmail = req.body.userEmail; // Assuming the client sends userEmail
     const inputs = req.body.inputs;
