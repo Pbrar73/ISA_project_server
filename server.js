@@ -66,10 +66,7 @@ const createUsersTable = () => {
 
 createUsersTable();
 
-let fetch;
-import('node-fetch').then(({ default: nodeFetch }) => {
-  fetch = nodeFetch;
-});
+const fetch = require('node-fetch'); // Import node-fetch module directly
 
 const jwtSecretKey = 'your_secret_key_here'; // Change this to a secure secret key
 
@@ -85,8 +82,6 @@ const verifyToken = (req, res, next) => {
         return res.status(400).json({ success: false, message: 'Invalid token.' });
     }
 };
-
-
 
 app.post('/register', (req, res) => {
     const { email, password } = req.body;
@@ -166,8 +161,9 @@ app.post('/generate-quote', verifyToken, async (req, res) => {
                 const response = await fetch(
                     'https://api-inference.huggingface.co/models/nandinib1999/quote-generator', {
                         headers: {
-                            'Authorization': 'Bearer ' + process.env.HF_API_TOKEN,
-                            'Content-Type': 'application/json'
+                            'Authorization': 'Bearer ' + process.env.HF_API_TOKEN, // You should replace this with the actual token
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${req.cookies.token}` // Include the token from the request
                         },
                         method: 'POST',
                         body: JSON.stringify({ inputs })
