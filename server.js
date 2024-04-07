@@ -144,29 +144,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-app.get('/api-calls-count', (req, res) => {
-    // Extract email from query parameters
-    const userEmail = req.query.email;
-
-    if (!userEmail) {
-        return res.status(400).json({ success: false, message: "Email is required to fetch API call count." });
-    }
-
-    // Query the database for the user's api_calls_made field
-    pool.query('SELECT api_calls_made FROM users WHERE email = ?', [userEmail], (err, results) => {
-        if (err) {
-            console.error('Error fetching API call count:', err);
-            return res.status(500).json({ success: false, message: 'Error fetching API call count from database.' });
-        }
-
-        if (results.length > 0) {
-            const apiCallsMade = results[0].api_calls_made;
-            res.json({ success: true, apiCallsMade: apiCallsMade });
-        } else {
-            res.status(404).json({ success: false, message: 'User not found.' });
-        }
-    });
-});
 
 app.post('/generate-quote', verifyToken, async (req, res) => {
     const userEmail = req.user.email; // Access user email from decoded JWT token
