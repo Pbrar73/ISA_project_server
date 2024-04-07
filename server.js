@@ -67,7 +67,7 @@ import('node-fetch').then(({ default: nodeFetch }) => {
   fetch = nodeFetch;
 });
 
-const jwtSecretKey = 'your_secret_key_here';
+const jwtSecretKey = 'your_secret_key_here'; // Change this to a secure secret key
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
@@ -106,21 +106,6 @@ app.post('/register', (req, res) => {
     });
 });
 
-app.get('/check-session', (req, res) => {
-    const token = req.cookies.token; // Assuming the JWT is stored in a cookie named 'token'
-    if (!token) {
-        return res.status(401).send('No token provided.');
-    }
-
-    try {
-        jwt.verify(token, jwtSecretKey); // Verify the token
-        res.send('Session is valid.'); // Respond positively if the token is valid
-    } catch (error) {
-        res.status(401).send('Session is invalid.'); // Respond negatively if the token is invalid
-    }
-});
-
-
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
@@ -152,7 +137,6 @@ app.post('/login', (req, res) => {
         }
     });
 });
-
 
 app.post('/generate-quote', verifyToken, async (req, res) => {
     const userEmail = req.user.email; // Access user email from decoded JWT token
