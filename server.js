@@ -107,19 +107,19 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/check-session', (req, res) => {
-    const token = req.cookies.token; // Assuming the JWT token is stored in an HTTP-only cookie named 'token'
+    const token = req.cookies.token;
     if (!token) {
-        return res.status(401).json({ success: false, message: 'No token provided.' });
+        return res.status(401).send({ success: false, message: 'No token provided.' });
     }
 
     try {
-        const decoded = jwt.verify(token, jwtSecretKey);
-        // Optionally add more checks, e.g., session expiration, user existence
-        res.json({ success: true, message: 'Session is valid.' });
+        jwt.verify(token, jwtSecretKey);
+        res.send({ success: true, message: 'Session is valid.' });
     } catch (error) {
-        return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
+        res.status(401).send({ success: false, message: 'Session is invalid.' });
     }
 });
+
 
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
