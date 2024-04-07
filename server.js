@@ -19,9 +19,10 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
+        res.sendStatus(200);
+    } else {
+        next();
     }
-    next();
 });
 
 const dbUrl = process.env.JAWSDB_URL;
@@ -162,8 +163,7 @@ app.post('/generate-quote', verifyToken, async (req, res) => {
                     'https://api-inference.huggingface.co/models/nandinib1999/quote-generator', {
                         headers: {
                             'Authorization': 'Bearer ' + process.env.HF_API_TOKEN, // You should replace this with the actual token
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${req.cookies.token}` // Include the token from the request
+                            'Content-Type': 'application/json'
                         },
                         method: 'POST',
                         body: JSON.stringify({ inputs })
