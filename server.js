@@ -123,13 +123,13 @@ app.post('/login', (req, res) => {
                     return;
                 }
 
-                const token = jwt.sign({ id: user.id, email: user.email }, jwtSecretKey, { expiresIn: '1h' });
+                const token = jwt.sign({ id: user.id, email: user.email }, jwtSecretKey, { expiresIn: '5d' });
 
                 res.cookie('token', token, {
                     httpOnly: true,
                     secure: true, 
                     sameSite: 'Lax', 
-                    maxAge: 3600000
+                    maxAge: 432000000
                 });
                 res.status(200).json({ success: true, message: 'Login successful' });
             });
