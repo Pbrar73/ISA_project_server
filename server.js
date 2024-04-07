@@ -143,7 +143,7 @@ app.post('/login', (req, res) => {
     });
 });
 
-app.post('/generate-quote', verifyToken, async (req, res) => {
+app.post('/generate-quote', async (req, res) => {
     const userEmail = req.user.email; // Access user email from decoded JWT token
     const inputs = req.body.inputs;
 
