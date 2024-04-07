@@ -67,7 +67,7 @@ import('node-fetch').then(({ default: nodeFetch }) => {
   fetch = nodeFetch;
 });
 
-const jwtSecretKey = 'your_secret_key_here'; // Change this to a secure secret key
+const jwtSecretKey = 'new_secret_key_1118'; // Change this to a secure secret key
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
