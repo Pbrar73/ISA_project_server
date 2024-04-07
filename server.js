@@ -2,8 +2,10 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 const path = require('path');
 const mysql = require('mysql');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const url = require('url');
 
 const app = express();
 const port = process.env.PORT || 3019;
@@ -13,24 +15,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from all origins (temporarily)
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-    next();
-});
-
-
+app.use(cors({
+    origin: 'https://regal-axolotl-938764.netlify.app',
+    credentials: true,
+}));
 
 const dbUrl = process.env.JAWSDB_URL;
 let dbOptions = {};
 
 if (dbUrl) {
-    const parsedUrl = new URL(dbUrl);
+    const parsedUrl = new url.URL(dbUrl);
     dbOptions = {
         host: parsedUrl.hostname,
         user: parsedUrl.username,
@@ -131,7 +125,11 @@ app.post('/login', (req, res) => {
 
                 const token = jwt.sign({ id: user.id, email: user.email }, jwtSecretKey, { expiresIn: '1h' });
 
-                res.cookie('token', token, { httpOnly: true });
+                res.cookie('token', token, {
+                    httpOnly: true
+                    // secure: true, 
+                    // sameSite: 'None', 
+                });
                 res.status(200).json({ success: true, message: 'Login successful' });
             });
         } else {
