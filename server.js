@@ -14,11 +14,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-    const allowedOrigins = ['https://regal-axolotl-938764.netlify.app', 'http://localhost:3000']; // Add your client application's origin here
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from all origins (temporarily)
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -27,6 +23,7 @@ app.use((req, res, next) => {
     }
     next();
 });
+
 
 
 const dbUrl = process.env.JAWSDB_URL;
@@ -143,7 +140,7 @@ app.post('/login', (req, res) => {
     });
 });
 
-app.post('/generate-quote', async (req, res) => {
+app.post('/generate-quote', verifyToken, async (req, res) => {
     const userEmail = req.user.email; // Access user email from decoded JWT token
     const inputs = req.body.inputs;
 
