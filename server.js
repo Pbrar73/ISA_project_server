@@ -6,7 +6,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const url = require('url');
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./path/to/your/swagger.json');
 const app = express();
 const port = process.env.PORT || 3019;
 
@@ -198,3 +199,14 @@ app.post('/generate-quote', verifyToken, async (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+// ... (the rest of your code above)
+
+app.get('/swagger.json', (req, res) => {
+    res.sendFile(path.join(__dirname, 'swagger.json'));
+  });
+  
+  // ... (the rest of your code below)
+  
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
