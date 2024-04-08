@@ -128,7 +128,7 @@ app.post('/login', (req, res) => {
                 res.cookie('token', token, {
                     httpOnly: true,
                     secure: true, 
-                    sameSite: 'Lax', 
+                    sameSite: 'None', 
                     maxAge: 432000000
                 });
                 res.status(200).json({ success: true, message: 'Login successful' });
@@ -137,6 +137,11 @@ app.post('/login', (req, res) => {
             res.status(404).json({ success: false, message: 'User not found' });
         }
     });
+});
+
+
+app.get('/check-session', verifyToken, (req, res) => {
+    res.json({ success: true, message: "Session is valid." });
 });
 
 app.post('/generate-quote', verifyToken, async (req, res) => {
