@@ -1,3 +1,4 @@
+// ChatGPT was used for help in this file
 const bcrypt = require('bcrypt');
 const express = require('express');
 const path = require('path');
@@ -68,7 +69,7 @@ import('node-fetch').then(({ default: nodeFetch }) => {
   fetch = nodeFetch;
 });
 
-const jwtSecretKey = 'new_secret_key_1118'; // Change this to a secure secret key
+const jwtSecretKey = 'new_secret_key_1118';
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
@@ -200,13 +201,8 @@ app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-
-
 app.get('/swagger.json', (req, res) => {
     res.sendFile(path.join(__dirname, 'swagger.json'));
   });
   
- 
-  
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
