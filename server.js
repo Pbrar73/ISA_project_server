@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const url = require('url');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./path/to/your/swagger.json');
+const swaggerDocument = require('./swagger.json');
 const app = express();
 const port = process.env.PORT || 3019;
 
