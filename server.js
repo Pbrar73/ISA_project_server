@@ -200,13 +200,13 @@ app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-// ... (the rest of your code above)
+
 
 app.get('/swagger.json', (req, res) => {
     res.sendFile(path.join(__dirname, 'swagger.json'));
   });
   
-  // ... (the rest of your code below)
+ 
   
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
