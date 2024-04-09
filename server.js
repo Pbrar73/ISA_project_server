@@ -142,7 +142,7 @@ app.post('/login', (req, res) => {
                     sameSite: 'None', 
                     maxAge: 432000000
                 });
-                res.status(200).json({ success: true, message: 'Login successful' });
+                res.status(200).json({ success: true, message: 'Login successful', is_admin: user.is_admin });
             });
         } else {
             res.status(404).json({ success: false, message: 'User not found' });
