@@ -87,12 +87,11 @@ const verifyToken = (req, res, next) => {
 
 // Admin check middleware
 const isAdmin = (req, res, next) => {
-    const { is_admin } = req.user;
-    if (!is_admin) {
-        return res.status(403).json({ success: false, message: 'Access denied. Only admin users are allowed.' });
+    if (!req.user.is_admin) {
+      return res.status(403).json({ success: false, message: 'Access denied. Only admin users are allowed.' });
     }
     next();
-};
+  };
 
 
 app.post('/register', (req, res) => {
@@ -135,7 +134,7 @@ app.post('/login', (req, res) => {
                     return;
                 }
 
-                const token = jwt.sign({ id: user.id, email: user.email }, jwtSecretKey, { expiresIn: '5d' });
+                const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin }, jwtSecretKey, { expiresIn: '5d' });
 
                 res.cookie('token', token, {
                     httpOnly: true,
