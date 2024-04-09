@@ -207,7 +207,7 @@ app.post('/generate-quote', verifyToken, async (req, res) => {
 });
 
 // Get all registered users' API information (accessible only to admin users)
-app.get('/admin/users', verifyToken, isAdmin, (req, res) => {
+app.get('/admin/users', isAdmin, (req, res) => {
     pool.query('SELECT email, api_calls_made FROM users', (error, results) => {
         if (error) {
             return res.status(500).json({ success: false, message: 'Error fetching users.' });
