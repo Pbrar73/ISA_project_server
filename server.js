@@ -85,6 +85,15 @@ const verifyToken = (req, res, next) => {
 };
 
 
+// Admin check middleware
+const isAdmin = (req, res, next) => {
+    const { is_admin } = req.user;
+    if (!is_admin) {
+        return res.status(403).json({ success: false, message: 'Access denied. Only admin users are allowed.' });
+    }
+    next();
+};
+
 
 app.post('/register', (req, res) => {
     const { email, password } = req.body;
@@ -195,6 +204,16 @@ app.post('/generate-quote', verifyToken, async (req, res) => {
         console.error('Error:', error);
         res.status(500).send('Error fetching quote.');
     }
+});
+
+// Get all registered users' API information (accessible only to admin users)
+app.get('/admin/users', verifyToken, isAdmin, (req, res) => {
+    pool.query('SELECT email, api_calls_made FROM users', (error, results) => {
+        if (error) {
+            return res.status(500).json({ success: false, message: 'Error fetching users.' });
+        }
+        res.status(200).json({ success: true, users: results });
+    });
 });
 
 app.listen(port, () => {
