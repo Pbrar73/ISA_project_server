@@ -222,7 +222,7 @@ app.get('/api-usage', verifyToken, (req, res) => {
 });
 
 
-// Get all registered users' API information (accessible only to admin users.)
+// Get all registered users' API information (accessible only to admin users)
 app.get('/admin/users', verifyToken, isAdmin, (req, res) => {
     pool.query('SELECT email, api_calls_made FROM users', (error, results) => {
         if (error) {
