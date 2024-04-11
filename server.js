@@ -234,7 +234,7 @@ app.get('/admin/users', verifyToken, isAdmin, (req, res) => {
 
 // Delete a user account (Admin only)
 app.delete('/admin/users/:id', verifyToken, isAdmin, (req, res) => {
-    const userId = req.user.id;
+    const userId = req.params.id;
 
     pool.query('DELETE FROM users WHERE id = ?', [userId], (error, results) => {
         if (error) {
