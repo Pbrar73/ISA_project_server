@@ -232,6 +232,39 @@ app.get('/admin/users', verifyToken, isAdmin, (req, res) => {
     });
 });
 
+// Delete a user account (Admin only)
+app.delete('/admin/users/:id', verifyToken, isAdmin, (req, res) => {
+    const userId = req.params.id;
+
+    pool.query('DELETE FROM users WHERE id = ?', [userId], (error, results) => {
+        if (error) {
+            return res.status(500).json({ success: false, message: 'Error deleting the user.' });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+        res.status(200).json({ success: true, message: 'User deleted successfully.' });
+    });
+});
+
+// Update user email
+app.put('/users/email', verifyToken, (req, res) => {
+    const userId = req.user.id;
+    const { newEmail } = req.body;
+
+    // Update user's email
+    pool.query('UPDATE users SET email = ? WHERE id = ?', [newEmail, userId], (error, results) => {
+        if (error) {
+            return res.status(500).json({ success: false, message: 'Error updating the email.' });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+        res.status(200).json({ success: true, message: 'Email updated successfully.' });
+    });
+});
+
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
