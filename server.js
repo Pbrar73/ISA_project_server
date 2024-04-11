@@ -84,8 +84,6 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-
-// Admin check middleware
 const isAdmin = (req, res, next) => {
     if (!req.user.is_admin) {
       return res.status(403).json({ success: false, message: 'Access denied. Only admin users are allowed.' });
