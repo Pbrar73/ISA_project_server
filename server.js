@@ -234,7 +234,7 @@ app.get('/admin/users', verifyToken, isAdmin, (req, res) => {
 
 // Delete a user account (Admin only)
 app.delete('/admin/users/:id', verifyToken, isAdmin, (req, res) => {
-    const userId = req.params.id;
+    const userId = req.user.id;
 
     pool.query('DELETE FROM users WHERE id = ?', [userId], (error, results) => {
         if (error) {
@@ -247,12 +247,10 @@ app.delete('/admin/users/:id', verifyToken, isAdmin, (req, res) => {
     });
 });
 
-// Update user email
 app.put('/users/email', verifyToken, (req, res) => {
     const userId = req.user.id;
     const { newEmail } = req.body;
 
-    // Update user's email
     pool.query('UPDATE users SET email = ? WHERE id = ?', [newEmail, userId], (error, results) => {
         if (error) {
             return res.status(500).json({ success: false, message: 'Error updating the email.' });
