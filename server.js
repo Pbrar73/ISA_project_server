@@ -205,6 +205,23 @@ app.post('/generate-quote', verifyToken, async (req, res) => {
     }
 });
 
+app.get('/api-usage', verifyToken, (req, res) => {
+    const userEmail = req.user.email;
+    
+    pool.query('SELECT api_calls_made FROM users WHERE email = ?', [userEmail], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'Error retrieving API usage' });
+        }
+
+        if (results.length > 0) {
+            return res.json({ success: true, apiCallsMade: results[0].api_calls_made });
+        } else {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+    });
+});
+
+
 // Get all registered users' API information (accessible only to admin users)
 app.get('/admin/users', verifyToken, isAdmin, (req, res) => {
     pool.query('SELECT email, api_calls_made FROM users', (error, results) => {
